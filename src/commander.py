@@ -2,6 +2,13 @@ import re
 
 
 class Command:
+    """
+    Represents a single executable command.
+    To define a command, extend this class, override act(text), and call handle(text).
+    Optionally override can_handle(text) to define more complex logic.
+    By default, handle() will call act() if can_handle() returns True, but this behavior
+    can be overridden.
+    """
     __slots__ = ['regex', 'groups', 'next']
 
     def __init__(self, regex: str):
@@ -49,12 +56,20 @@ class _GenericCommand(Command):
         return self.act_func(self, text)
 
 
-class Chain:
+class Commander:
+    """
+    Attach new Command implementations in a chain. Commands are evaluated in the order they are linked.
+    Evaluate commands with handle(text).
+    """
     def __init__(self):
         self.head = None
         self.tail = None
 
-    def link_cls(self, cls, *args, **kwargs):
+    def add_cls(self, cls, *args, **kwargs):
+        """
+        Pass a class (not an Object) and any constructor arguments.
+        Creates a new instance of that class and attaches it to the end of the chain.
+        """
         cmd = cls(*args, **kwargs)
         if self.head is None:
             self.head = cmd
@@ -64,7 +79,11 @@ class Chain:
             self.tail = cmd
         return self
 
-    def link_def(self, regex, func):
+    def add_def(self, regex, func):
+        """
+        Pass a regular expression to evaluate input against, and a function to act with.
+        Function definition must match: func(cmd: Command, text: str).
+        """
         self.link_cls(_GenericCommand, regex, func)
 
     def handle(self, text):
@@ -112,7 +131,7 @@ if __name__ == '__main__':
 
         loop = False
 
-    chain = Chain()
+    chain = Commander()
     chain.link_def(r'add (.+)', lambda self, text: stack.append(self.groups[0]))
     chain.link_cls(PopCommand)
     chain.link_cls(ClearCommand)
