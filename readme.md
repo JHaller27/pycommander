@@ -13,7 +13,7 @@ This is likely the most simple version. It requires creating a `Commander` class
 **Example**
 
 ```python
-from pycommander import Command, Commander
+from PyCommander.all import Command, Commander
 
 # Global variables
 loop = True
@@ -49,7 +49,7 @@ The `can_handle()` and `handle()` methods may optionally be overridden (for more
 **Example**
 
 ```python
-from pycommander import Command, Commander
+from PyCommander.all import Command, Commander
 
 # Command implementations
 class EchoCommand(Command):
@@ -84,7 +84,7 @@ while loop:
 This is nearly identical to the previous process, but Commands may be created, chained, and used without the `Commander` class.
 
 ```python
-from pycommander import Command, Commander
+from PyCommander.all import Command, Commander
 
 # Command implementations
 class EchoCommand(Command):
