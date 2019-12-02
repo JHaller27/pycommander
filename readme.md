@@ -4,6 +4,9 @@ A Python library used to define custom commands.
 
 # Usage
 
+Create a Commander object and add Commands using any the methods described below.
+Note that the Commander class creates help and exit commands by default.
+
 There are 3 primary ways to create commands...
 
 ## Use Commander with functions/lambdas
@@ -16,7 +19,7 @@ This is likely the most simple version. It requires creating a `Commander` class
 from pycommander.all import Command, Commander
 
 # Global variables
-loop = True
+message = ''
 
 # Create the Commander
 commander = Commander()
@@ -28,16 +31,21 @@ commander = Commander()
 commander.add_def(r'echo (.+)', lambda cmd, text: print(cmd.groups[0])
 
 # May use named functions as well as lambdas
-def exit_cmd(self, text):
-    global loop
+def set_message_cmd(self, cmd, text):
+    global message
 
-    loop = False
+    # May use named capture groups
+    message = cmd.groups['msg']
 
-commander.add_def(r'exit', exit_cmd))
+# Can optionally specify help text
+# (Named capture group definition)
+commander.add_def(r'set (?P<msg>.+)', set_message_cmd, help='set\n\tSet global message')
 
-while loop:
-    command_string = input('> ')
-    commander.handle(command_string)
+# No arguments to use default prompt, or set the prompt argument.
+#    If prompt is a string, it will be calculated once and used for every prompt.
+#    If prompt is a function (accepting no parameters and returning the prompt string),
+#        the callback is called with each iteration.
+commander.handle_loop()
 ```
 
 ## Use Commander with Command classes
@@ -57,6 +65,9 @@ class EchoCommand(Command):
         super().__init__(self, r'echo (.+)')
     def act(self, text: str):
         print(text)
+    # Help method may optionally be defined
+    def help(self):
+        return 'echo <text>\n\tPrint <text> to console'
 
 class ExitCommand(Command):
     def __init__(self):
@@ -74,9 +85,7 @@ commander = Commander()
 commander.add_cls(EchoCommand)
 commander.add_cls(ExitCommand)
 
-while loop:
-    command_string = input('< ')
-    commander.handle(command_string)
+commander.handle_loop()
 ```
 
 ## Implement Command chain
@@ -110,6 +119,7 @@ echo_cmd.next = exit_cmd
 
 # Subsequent Commands must be attached to the most recently attached Command
 
+# A custom command handling loop may be used
 while loop:
     command_string = input('< ')
     
