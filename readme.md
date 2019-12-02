@@ -41,11 +41,11 @@ def set_message_cmd(self, cmd, text):
 # (Named capture group definition)
 commander.add_def(r'set (?P<msg>.+)', set_message_cmd, help='set\n\tSet global message')
 
-# No arguments to use default prompt, or set the prompt argument.
+# May define optional prompt parameter.
 #    If prompt is a string, it will be calculated once and used for every prompt.
 #    If prompt is a function (accepting no parameters and returning the prompt string),
 #        the callback is called with each iteration.
-commander.handle_loop()
+commander.handle_loop(lambda: '%s> ' % message)
 ```
 
 ## Use Commander with Command classes
