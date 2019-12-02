@@ -101,12 +101,10 @@ class Commander:
     def halt_loop(self):
         self._loop = False
 
-    def handle_loop(self, prompt='> ', prompt_callback=None):
+    def handle_loop(self, prompt='> '):
         while self._loop:
-            if prompt_callback is not None:
-                prompt = prompt_callback()
             try:
-                command_text = input(prompt)
+                command_text = input(prompt() if callable(prompt) else prompt)
             except EOFError:
                 command_text = 'exit'
                 print(command_text)
