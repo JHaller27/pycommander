@@ -13,7 +13,7 @@ This is likely the most simple version. It requires creating a `Commander` class
 **Example**
 
 ```python
-from PyCommander.all import Command, Commander
+from pycommander.all import Command, Commander
 
 # Global variables
 loop = True
@@ -25,7 +25,7 @@ commander = Commander()
 # Note that cmd refers to a Command instance.
 #   cmd.groups is the groups evaluated from the passed-in regular expression.
 #   There is only one group in the regex we defined, so the first group is the only useful item.
-commander.add_def(r'echo (.+)', lambda cmd, text: print(cmd.groups[0]))
+commander.add_def(r'echo (.+)', lambda cmd, text: print(cmd.groups[0])
 
 # May use named functions as well as lambdas
 def exit_cmd(self, text):
@@ -49,18 +49,18 @@ The `can_handle()` and `handle()` methods may optionally be overridden (for more
 **Example**
 
 ```python
-from PyCommander.all import Command, Commander
+from pycommander.all import Command, Commander
 
 # Command implementations
 class EchoCommand(Command):
     def __init__(self):
-        super().__init__(self, r'echo (.+))')
+        super().__init__(self, r'echo (.+)')
     def act(self, text: str):
         print(text)
 
 class ExitCommand(Command):
     def __init__(self):
-        super().__init__(self, r'echo (.+))')
+        super().__init__(self, r'echo (.+)')
     def act(self, text: str):
         global loop
         loop = False
@@ -84,7 +84,7 @@ while loop:
 This is nearly identical to the previous process, but Commands may be created, chained, and used without the `Commander` class.
 
 ```python
-from PyCommander.all import Command, Commander
+from pycommander.all import Command, Commander
 
 # Command implementations
 class EchoCommand(Command):
