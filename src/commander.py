@@ -84,7 +84,7 @@ class Commander:
         Pass a regular expression to evaluate input against, and a function to act with.
         Function definition must match: func(cmd: Command, text: str).
         """
-        self.link_cls(_GenericCommand, regex, func)
+        self.add_cls(_GenericCommand, regex, func)
 
     def handle(self, text):
         return self.head.handle(text)
@@ -132,11 +132,11 @@ if __name__ == '__main__':
         loop = False
 
     chain = Commander()
-    chain.link_def(r'add (.+)', lambda self, text: stack.append(self.groups[0]))
-    chain.link_cls(PopCommand)
-    chain.link_cls(ClearCommand)
-    chain.link_cls(ShowCommand)
-    chain.link_def(r'exit', exit_cmd)
+    chain.add_def(r'add (.+)', lambda self, text: stack.append(self.groups[0]))
+    chain.add_cls(PopCommand)
+    chain.add_cls(ClearCommand)
+    chain.add_cls(ShowCommand)
+    chain.add_def(r'exit', exit_cmd)
 
     while loop:
         chain.handle(input('> '))
