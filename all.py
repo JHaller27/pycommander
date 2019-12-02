@@ -1,1 +1,1 @@
-from src.commander import Command, Commander
+from pycommander.src.commander import Command, Commander
