@@ -41,19 +41,25 @@ class Command:
     def act(self, text):
         raise NotImplementedError()
 
-
     def next_handle(self, text):
         if self.next is not None:
             self.next.handle(text)
+            
+    def help(self):
+        return None
 
 
 class _GenericCommand(Command):
-    def __init__(self, regex, act_func):
+    def __init__(self, regex, act_func, help=None):
         super().__init__(regex)
         self.act_func = act_func
+        self.help_text = help
 
     def act(self, text):
         return self.act_func(self, text)
+    
+    def help(self):
+        return self.help_text
 
 
 class Commander:
@@ -62,8 +68,11 @@ class Commander:
     Evaluate commands with handle(text).
     """
     def __init__(self):
+        self._loop = True
         self.head = None
         self.tail = None
+        self.add_cls(_HelpCommand, self)
+        self.add_cls(_ExitCommand, self)
 
     def add_cls(self, cls, *args, **kwargs):
         """
@@ -79,22 +88,62 @@ class Commander:
             self.tail = cmd
         return self
 
-    def add_def(self, regex, func):
+    def add_def(self, regex, func, help=None):
         """
         Pass a regular expression to evaluate input against, and a function to act with.
         Function definition must match: func(cmd: Command, text: str).
         """
-        self.add_cls(_GenericCommand, regex, func)
+        self.add_cls(_GenericCommand, regex, func, help)
 
     def handle(self, text):
         return self.head.handle(text)
+
+    def halt_loop(self):
+        self._loop = False
+
+    def handle_loop(self, prompt='> ', prompt_callback=None):
+        while self._loop:
+            if prompt_callback is not None:
+                prompt = prompt_callback()
+            try:
+                command_text = input(prompt)
+            except EOFError:
+                command_text = 'exit'
+                print(command_text)
+            self.handle(command_text)
+    
+    
+class _HelpCommand(Command):
+    def __init__(self, commander):
+        super().__init__(r'help')
+        self._commander = commander
+    def act(self, text: str):
+        cmd_ptr = self._commander.head
+        help_list = []
+        while cmd_ptr is not None:
+            help_text = cmd_ptr.help()
+            if help_text is not None:
+                help_list.append(help_text)
+            cmd_ptr = cmd_ptr.next
+        print('\n'.join(help_list))
+    def help(self):
+        return 'help\n\tDisplay this help text'
+
+
+class _ExitCommand(Command):
+    def __init__(self, commander):
+        super().__init__(r'exit')
+        self._commander = commander
+    def act(self, text: str):
+        self._commander.halt_loop()
+    def help(self):
+        return 'exit\n\tExit commander processing loop'
 
 
 if __name__ == '__main__':
     print('Testing PyCommander')
 
     stack = []
-    loop = True
 
     class PopCommand(Command):
         def __init__(self):
@@ -126,17 +175,10 @@ if __name__ == '__main__':
 
             print(stack)
 
-    def exit_cmd(self, text):
-        global loop
-
-        loop = False
-
     chain = Commander()
     chain.add_def(r'add (.+)', lambda self, text: stack.append(self.groups[0]))
     chain.add_cls(PopCommand)
     chain.add_cls(ClearCommand)
     chain.add_cls(ShowCommand)
-    chain.add_def(r'exit', exit_cmd)
 
-    while loop:
-        chain.handle(input('> '))
+    chain.handle_loop('> ')
